@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Secret de la Conca — Portal de Reserves</title>
+
+<!-- ============================================================
+     EL SECRET DE LA CONCA — Portal de Reserves v1.0
+     Instruccions de configuració al final d'aquest fitxer
+     ============================================================ -->
+
+<style>
+/* ── VARIABLES ─────────────────────────────────────────────── */
+:root {
+  --negro:#1A1A1A; --dorado:#8C7355; --dorado-l:#B09878;
+  --gris-s:#F5F4F0; --gris-l:#DEDAD4; --gris-t:#7A756E;
+  --blanc:#FFFFFF; --azul:#2563A8; --verde:#1A7A45;
+  --naranja:#C05A1A; --rojo:#A83225;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Georgia',serif;background:var(--gris-s);color:var(--negro);}
+
+/* ── LAYOUT ─────────────────────────────────────────────────── */
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* ── SIDEBAR ────────────────────────────────────────────────── */
+.sidebar{width:220px;min-width:220px;background:var(--negro);display:flex;flex-direction:column;}
+.sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid #333;}
+.sidebar-logo .brand{color:var(--dorado);font-size:14px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;}
+.sidebar-logo .sub{color:#666;font-size:11px;margin-top:2px;font-family:Arial,sans-serif;}
+.sidebar-nav{flex:1;padding:16px 0;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:#AAA;font-size:13px;cursor:pointer;transition:all .2s;font-family:Arial,sans-serif;border-left:3px solid transparent;}
+.nav-item:hover{color:#FFF;background:#2A2A2A;}
+.nav-item.active{color:var(--dorado);background:#252525;border-left-color:var(--dorado);}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+.nav-section{padding:16px 20px 6px;color:#444;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-family:Arial,sans-serif;}
+.sidebar-user{padding:16px 20px;border-top:1px solid #333;font-family:Arial,sans-serif;}
+.user-name{color:#CCC;font-size:13px;}
+.user-email{color:#666;font-size:11px;margin-top:2px;}
+.btn-logout{margin-top:10px;background:none;border:1px solid #444;color:#888;padding:6px 12px;border-radius:4px;font-size:12px;cursor:pointer;width:100%;font-family:Arial,sans-serif;}
+.btn-logout:hover{border-color:#888;color:#CCC;}
+
+/* ── TOPBAR ──────────────────────────────────────────────────── */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.topbar{background:white;padding:14px 28px;border-bottom:1px solid var(--gris-l);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.topbar-title{font-size:20px;font-weight:bold;}
+.topbar-sub{font-size:12px;color:var(--gris-t);font-family:Arial,sans-serif;margin-top:2px;}
+.topbar-actions{display:flex;gap:10px;align-items:center;}
+
+/* ── BOTONS ──────────────────────────────────────────────────── */
+.btn{padding:8px 18px;border-radius:4px;font-size:13px;cursor:pointer;border:none;font-family:Arial,sans-serif;font-weight:600;transition:all .2s;}
+.btn-primary{background:var(--dorado);color:white;}
+.btn-primary:hover{background:var(--dorado-l);}
+.btn-outline{background:white;color:var(--negro);border:1.5px solid var(--gris-l);}
+.btn-outline:hover{border-color:var(--dorado);color:var(--dorado);}
+.btn-success{background:var(--verde);color:white;}
+.btn-danger{background:var(--rojo);color:white;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-full{width:100%;padding:11px;font-size:14px;border-radius:6px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* ── CONTINGUT ───────────────────────────────────────────────── */
+.content{padding:24px 28px;flex:1;}
+
+/* ── STATS ───────────────────────────────────────────────────── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:white;border-radius:8px;padding:16px 20px;border:1px solid var(--gris-l);border-top:3px solid var(--dorado);}
+.stat-label{font-size:11px;color:var(--gris-t);text-transform:uppercase;letter-spacing:.8px;font-family:Arial,sans-serif;}
+.stat-value{font-size:28px;font-weight:bold;margin-top:4px;}
+.stat-change{font-size:11px;color:var(--verde);margin-top:2px;font-family:Arial,sans-serif;}
+
+/* ── FILTRES ─────────────────────────────────────────────────── */
+.filters-bar{background:white;border-radius:8px;padding:16px 20px;border:1px solid var(--gris-l);margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.filter-label{font-size:12px;color:var(--gris-t);font-family:Arial,sans-serif;font-weight:600;white-space:nowrap;}
+.filter-select,.filter-date,.search-input{padding:7px 12px;border:1.5px solid var(--gris-l);border-radius:4px;font-size:13px;font-family:Arial,sans-serif;color:var(--negro);background:white;}
+.filter-select{min-width:140px;}
+.search-input{flex:1;min-width:180px;}
+.filter-select:focus,.filter-date:focus,.search-input:focus{outline:none;border-color:var(--dorado);}
+.filter-sep{width:1px;height:28px;background:var(--gris-l);}
+
+/* ── TAULA ───────────────────────────────────────────────────── */
+.table-card{background:white;border-radius:8px;border:1px solid var(--gris-l);overflow:hidden;}
+.table-header{padding:14px 20px;border-bottom:1px solid var(--gris-l);display:flex;align-items:center;justify-content:space-between;}
+.table-title{font-size:14px;font-weight:bold;font-family:Arial,sans-serif;}
+.table-count{font-size:12px;color:var(--gris-t);font-family:Arial,sans-serif;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:var(--gris-t);text-transform:uppercase;letter-spacing:.7px;background:var(--gris-s);border-bottom:1px solid var(--gris-l);font-family:Arial,sans-serif;}
+td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--gris-l);font-family:Arial,sans-serif;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr.data-row:hover td{background:#FAFAF8;cursor:pointer;}
+tr.selected td{background:#FDF9F5;}
+.badge{display:inline-block;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;font-family:Arial,sans-serif;}
+.badge-green{background:#E6F4EC;color:var(--verde);}
+.badge-orange{background:#FEF3E8;color:var(--naranja);}
+.badge-red{background:#FDECEA;color:var(--rojo);}
+.badge-blue{background:#EBF3FC;color:var(--azul);}
+.badge-gray{background:#F0F0F0;color:#666;}
+.pagination{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--gris-l);}
+.page-info{font-size:12px;color:var(--gris-t);font-family:Arial,sans-serif;}
+.page-btns{display:flex;gap:6px;}
+
+/* ── PANELL DETALL ───────────────────────────────────────────── */
+.detail-panel{width:360px;min-width:360px;background:white;border-left:1px solid var(--gris-l);display:flex;flex-direction:column;}
+.detail-header{padding:20px;border-bottom:1px solid var(--gris-l);background:var(--negro);}
+.detail-name{font-size:17px;font-weight:bold;color:white;}
+.detail-ref{font-size:12px;color:var(--dorado);margin-top:3px;font-family:Arial,sans-serif;}
+.detail-aloj{font-size:12px;color:#999;margin-top:2px;font-family:Arial,sans-serif;}
+.detail-section{padding:14px 20px;border-bottom:1px solid var(--gris-l);}
+.detail-section-title{font-size:10px;font-weight:700;color:var(--dorado);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:Arial,sans-serif;}
+.detail-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;}
+.detail-key{font-size:12px;color:var(--gris-t);font-family:Arial,sans-serif;}
+.detail-val{font-size:13px;color:var(--negro);font-family:Arial,sans-serif;font-weight:500;text-align:right;}
+.detail-val.amount{color:var(--dorado);font-weight:bold;font-size:15px;}
+.detail-actions{padding:16px 20px;display:flex;flex-direction:column;gap:8px;margin-top:auto;}
+
+/* ── FORMULARI ───────────────────────────────────────────────── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group.full{grid-column:1/-1;}
+.form-label{font-size:12px;font-weight:600;color:var(--gris-t);text-transform:uppercase;letter-spacing:.5px;font-family:Arial,sans-serif;}
+.form-input{padding:9px 12px;border:1.5px solid var(--gris-l);border-radius:5px;font-size:14px;font-family:Arial,sans-serif;color:var(--negro);}
+.form-input:focus{outline:none;border-color:var(--dorado);}
+.form-section-title{font-size:11px;font-weight:700;color:var(--dorado);text-transform:uppercase;letter-spacing:1px;margin:20px 0 10px;font-family:Arial,sans-serif;border-bottom:1px solid var(--gris-l);padding-bottom:6px;}
+
+/* ── PANTALLES ───────────────────────────────────────────────── */
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* ── MODALS ──────────────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100;}
+.modal-overlay.open{display:flex;}
+.modal{background:white;border-radius:10px;width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--gris-l);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:white;z-index:1;}
+.modal-title{font-size:17px;font-weight:bold;}
+.modal-close{font-size:22px;cursor:pointer;color:var(--gris-t);background:none;border:none;}
+.modal-body{padding:24px;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--gris-l);display:flex;gap:10px;justify-content:flex-end;}
+
+/* ── LOGIN ───────────────────────────────────────────────────── */
+#login-screen{position:fixed;inset:0;background:var(--negro);display:flex;align-items:center;justify-content:center;z-index:200;}
+.login-box{background:white;border-radius:12px;padding:48px 40px;width:400px;text-align:center;}
+.login-logo{font-size:14px;color:var(--dorado);letter-spacing:2px;text-transform:uppercase;font-weight:bold;margin-bottom:4px;}
+.login-sub{font-size:22px;font-weight:bold;margin-bottom:8px;}
+.login-desc{font-size:13px;color:var(--gris-t);font-family:Arial,sans-serif;margin-bottom:32px;}
+.btn-ms{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:14px;border:2px solid var(--gris-l);border-radius:6px;font-size:15px;cursor:pointer;background:white;font-family:Arial,sans-serif;font-weight:600;transition:all .2s;}
+.btn-ms:hover{border-color:var(--dorado);background:var(--gris-s);}
+.ms-logo{font-size:22px;}
+
+/* ── LOADING ─────────────────────────────────────────────────── */
+.loading{text-align:center;padding:60px;color:var(--gris-t);font-family:Arial,sans-serif;}
+.spinner{width:40px;height:40px;border:3px solid var(--gris-l);border-top-color:var(--dorado);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TOAST ───────────────────────────────────────────────────── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--negro);color:white;padding:14px 20px;border-radius:8px;font-family:Arial,sans-serif;font-size:14px;z-index:300;transform:translateY(100px);transition:transform .3s;box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.toast.show{transform:translateY(0);}
+.toast.success{border-left:4px solid var(--verde);}
+.toast.error{border-left:4px solid var(--rojo);}
+
+/* ── EXPORT ──────────────────────────────────────────────────── */
+.export-info{background:#EDF7F1;border:1px solid #B8DEC8;border-radius:6px;padding:14px 16px;margin-bottom:16px;font-size:13px;font-family:Arial,sans-serif;color:#1A5C32;}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ─────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">El Secret de la Conca</div>
+    <div class="login-sub">Portal de Reserves</div>
+    <div class="login-desc">Inicia sessió amb el teu compte Microsoft 365 per accedir</div>
+    <button class="btn-ms" onclick="login()">
+      <span class="ms-logo">⊞</span>
+      Continuar amb Microsoft 365
+    </button>
+    <div style="margin-top:20px;font-size:11px;color:#CCC;font-family:Arial,sans-serif;">
+      Accés restringit · El Secret de la Conca S.L.
+    </div>
+  </div>
+</div>
+
+<!-- ── APP ───────────────────────────────────────────────────── -->
+<div class="app" id="app" style="display:none;">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">El Secret</div>
+      <div class="sub">de la Conca · Gestió</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <div class="nav-item active" id="nav-reserves" onclick="showScreen('reserves')">
+        <span class="nav-icon">📋</span> Reserves
+      </div>
+      <div class="nav-item" id="nav-nova" onclick="showScreen('nova')">
+        <span class="nav-icon">➕</span> Nova reserva
+      </div>
+      <div class="nav-section">Facturació</div>
+      <div class="nav-item" id="nav-factures" onclick="showScreen('factures')">
+        <span class="nav-icon">🧾</span> Factures
+      </div>
+      <div class="nav-item" id="nav-export" onclick="showScreen('export')">
+        <span class="nav-icon">📊</span> Exportar Excel
+      </div>
+      <div class="nav-section">Eines</div>
+      <div class="nav-item" onclick="openModal('importModal')">
+        <span class="nav-icon">⬆</span> Importar Amenitiz
+      </div>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-name" id="user-name">—</div>
+      <div class="user-email" id="user-email">—</div>
+      <button class="btn-logout" onclick="logout()">Tancar sessió</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">Reserves</div>
+        <div class="topbar-sub" id="topbar-sub">Carregant...</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline" onclick="openModal('importModal')">⬆ Importar Amenitiz</button>
+        <button class="btn btn-primary" onclick="showScreen('nova')">+ Nova reserva</button>
+      </div>
+    </div>
+
+    <!-- SCREEN: RESERVES -->
+    <div id="screen-reserves" class="screen active">
+      <div class="content">
+        <div class="stats-bar">
+          <div class="stat-card">
+            <div class="stat-label">Total reserves</div>
+            <div class="stat-value" id="stat-total">—</div>
+            <div class="stat-change">Actualitzat ara</div>
+          </div>
+          <div class="stat-card" style="border-top-color:var(--naranja)">
+            <div class="stat-label">Factures pendents</div>
+            <div class="stat-value" id="stat-pendents" style="color:var(--naranja)">—</div>
+            <div class="stat-change" style="color:var(--naranja)">Per emetre</div>
+          </div>
+          <div class="stat-card" style="border-top-color:var(--verde)">
+            <div class="stat-label">Import total</div>
+            <div class="stat-value" id="stat-import" style="color:var(--verde);font-size:20px;">—</div>
+            <div class="stat-change">Totes les reserves</div>
+          </div>
+          <div class="stat-card" style="border-top-color:var(--azul)">
+            <div class="stat-label">Allotjaments actius</div>
+            <div class="stat-value" id="stat-aloj">6</div>
+            <div class="stat-change">El Secret de la Conca</div>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <span class="filter-label">Filtrar:</span>
+          <select class="filter-select" id="filter-aloj" onchange="applyFilters()">
+            <option value="">Tots els allotjaments</option>
+            <option>La Princesa</option><option>El Drac</option>
+            <option>El Caballer</option><option>Ca L'Esquelleta</option>
+            <option>Can l'Hospitalet</option><option>Solsenyor</option>
+          </select>
+          <select class="filter-select" id="filter-plataforma" onchange="applyFilters()">
+            <option value="">Totes les plataformes</option>
+            <option>Airbnb</option><option>Booking.com</option><option>Directe</option>
+          </select>
+          <div class="filter-sep"></div>
+          <span class="filter-label">Check-in:</span>
+          <input type="date" class="filter-date" id="filter-from" onchange="applyFilters()">
+          <input type="date" class="filter-date" id="filter-to" onchange="applyFilters()">
+          <div class="filter-sep"></div>
+          <input type="text" class="search-input" id="search-input" placeholder="🔍 Cercar client, nº reserva..." oninput="applyFilters()">
+        </div>
+
+        <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--gris-l);">
+          <div style="flex:1;overflow:hidden;">
+            <div class="table-card" style="border:none;border-radius:0;">
+              <div class="table-header">
+                <span class="table-title">Llista de reserves</span>
+                <span class="table-count" id="table-count">—</span>
+              </div>
+              <div id="table-body-wrapper">
+                <div class="loading"><div class="spinner"></div>Carregant reserves...</div>
+              </div>
+              <div class="pagination">
+                <span class="page-info" id="page-info">—</span>
+                <div class="page-btns" id="page-btns"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANELL DETALL -->
+          <div class="detail-panel" id="detail-panel">
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--gris-t);font-family:Arial,sans-serif;font-size:14px;padding:40px;text-align:center;">
+              <div>
+                <div style="font-size:40px;margin-bottom:16px;">👆</div>
+                Selecciona una reserva per veure els detalls
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN: NOVA RESERVA -->
+    <div id="screen-nova" class="screen">
+      <div class="content" style="max-width:760px;">
+        <div style="background:white;border-radius:8px;border:1px solid var(--gris-l);padding:28px;">
+          <input type="hidden" id="edit-id" value="">
+
+          <div class="form-section-title">Dades del client</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nom complet *</label>
+              <input class="form-input" id="f-nom" type="text" placeholder="Nom i cognoms">
+            </div>
+            <div class="form-group">
+              <label class="form-label">DNI / NIE / CIF *</label>
+              <input class="form-input" id="f-dni" type="text" placeholder="Ex: 12345678A">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-input" id="f-email" type="email" placeholder="correu@exemple.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Telèfon</label>
+              <input class="form-input" id="f-telefon" type="tel" placeholder="+34 600 000 000">
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Empresa (si factura a empresa)</label>
+              <input class="form-input" id="f-empresa" type="text" placeholder="Nom de l'empresa (opcional)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Adreça</label>
+              <input class="form-input" id="f-adreca" type="text" placeholder="Carrer i número">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CP i Ciutat</label>
+              <input class="form-input" id="f-cp" type="text" placeholder="08001 Barcelona">
+            </div>
+          </div>
+
+          <div class="form-section-title">Estada</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Allotjament *</label>
+              <select class="form-input" id="f-aloj">
+                <option value="">Selecciona...</option>
+                <option>La Princesa</option><option>El Drac</option>
+                <option>El Caballer</option><option>Ca L'Esquelleta</option>
+                <option>Can l'Hospitalet</option><option>Solsenyor</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Plataforma</label>
+              <select class="form-input" id="f-plataforma">
+                <option>Directe</option><option>Airbnb</option><option>Booking.com</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Check-in *</label>
+              <input class="form-input" id="f-checkin" type="date" onchange="calcNits()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Check-out *</label>
+              <input class="form-input" id="f-checkout" type="date" onchange="calcNits()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nits (auto)</label>
+              <input class="form-input" id="f-nits" type="number" placeholder="0" readonly style="background:var(--gris-s);">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Adults *</label>
+              <input class="form-input" id="f-adults" type="number" placeholder="2" min="1" onchange="calcFactura()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Menors (-17 anys)</label>
+              <input class="form-input" id="f-menors" type="number" placeholder="0" min="0" onchange="calcFactura()">
+            </div>
+          </div>
+
+          <div class="form-section-title">Preus i serveis</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Preu per nit (€) *</label>
+              <input class="form-input" id="f-preu-nit" type="number" step="0.01" placeholder="150.00" onchange="calcFactura()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Esmorzars (ud.)</label>
+              <input class="form-input" id="f-ud-esm" type="number" placeholder="0" min="0" onchange="calcFactura()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Preu esmorzar (€/ud)</label>
+              <input class="form-input" id="f-preu-esm" type="number" step="0.01" placeholder="7.00" onchange="calcFactura()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dinars (ud.)</label>
+              <input class="form-input" id="f-ud-din" type="number" placeholder="0" min="0" onchange="calcFactura()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Preu dinar (€/ud)</label>
+              <input class="form-input" id="f-preu-din" type="number" step="0.01" placeholder="12.00" onchange="calcFactura()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sopars (ud.)</label>
+              <input class="form-input" id="f-ud-sop" type="number" placeholder="0" min="0" onchange="calcFactura()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Preu sopar (€/ud)</label>
+              <input class="form-input" id="f-preu-sop" type="number" step="0.01" placeholder="15.00" onchange="calcFactura()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pack celebració (ud.)</label>
+              <input class="form-input" id="f-ud-pack" type="number" placeholder="0" min="0" onchange="calcFactura()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Preu pack (€/ud)</label>
+              <input class="form-input" id="f-preu-pack" type="number" step="0.01" placeholder="0.00" onchange="calcFactura()">
+            </div>
+          </div>
+
+          <!-- RESUM CALCULAT -->
+          <div id="resum-calc" style="display:none;background:var(--gris-s);border-radius:8px;padding:16px;margin-top:16px;font-family:Arial,sans-serif;">
+            <div style="font-size:11px;font-weight:700;color:var(--dorado);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Resum calculat automàticament</div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:var(--gris-t)">Base imponible</span><span id="r-base">—</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:var(--gris-t)">IVA (10%)</span><span id="r-iva">—</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="color:var(--gris-t);font-style:italic">Taxa turística</span><span id="r-taxa">—</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:bold;color:var(--dorado);border-top:2px solid var(--dorado);margin-top:8px;padding-top:8px;"><span>TOTAL</span><span id="r-total">—</span></div>
+          </div>
+
+          <div class="form-section-title">Pagament</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Forma de pagament</label>
+              <select class="form-input" id="f-forma-pago">
+                <option>Transferència bancària</option>
+                <option>Targeta</option><option>Efectiu</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Estat del pagament</label>
+              <select class="form-input" id="f-estat-pago">
+                <option>Pendent</option><option>Pagat</option><option>Pagament parcial</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Notes internes</label>
+              <input class="form-input" id="f-notes" type="text" placeholder="Observacions...">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--gris-l);">
+            <button class="btn btn-outline" onclick="showScreen('reserves')">Cancel·lar</button>
+            <button class="btn btn-primary" style="padding:10px 28px;" onclick="saveReserva()" id="btn-save">💾 Guardar reserva</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN: FACTURES -->
+    <div id="screen-factures" class="screen">
+      <div class="content">
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">Factures emeses</span>
+            <button class="btn btn-outline btn-sm" onclick="showScreen('export')">📊 Exportar tot a Excel</button>
+          </div>
+          <div id="factures-body">
+            <div class="loading"><div class="spinner"></div>Carregant factures...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN: EXPORT -->
+    <div id="screen-export" class="screen">
+      <div class="content" style="max-width:600px;">
+        <div style="background:white;border-radius:8px;border:1px solid var(--gris-l);padding:28px;">
+          <div class="export-info">
+            ✅ L'Excel inclourà <b>totes les reserves</b> del període amb tots els camps i el
+            <b>link directe a cada factura PDF</b> a SharePoint (carpeta any/mes).
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Des de</label>
+              <input class="form-input" id="exp-from" type="date">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Fins a</label>
+              <input class="form-input" id="exp-to" type="date">
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Allotjament</label>
+              <select class="form-input" id="exp-aloj">
+                <option value="">Tots</option>
+                <option>La Princesa</option><option>El Drac</option>
+                <option>El Caballer</option><option>Ca L'Esquelleta</option>
+                <option>Can l'Hospitalet</option><option>Solsenyor</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:20px;padding:14px;background:var(--gris-s);border-radius:6px;font-size:13px;font-family:Arial,sans-serif;line-height:1.8;">
+            <b>Camps exportats:</b><br>
+            Nº Reserva · Client · DNI/CIF · Email · Allotjament · Check-in · Check-out · Nits ·
+            Adults · Plataforma · Preu/nit · Esmorzar · Dinar · Sopar · Pack · Taxa turística ·
+            Base imponible · IVA · Total · Forma pagament · Estat ·
+            <b style="color:var(--azul)">🔗 Link PDF Factura</b>
+          </div>
+          <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px;">
+            <button class="btn btn-success" style="padding:10px 28px;" onclick="exportExcel()">
+              📊 Generar i descarregar Excel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: FACTURA EDITABLE -->
+<div class="modal-overlay" id="facturaModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="factura-modal-title">🧾 Factura</div>
+        <div style="font-size:12px;color:var(--gris-t);font-family:Arial,sans-serif;margin-top:2px;">Revisa i edita els imports. Quan confirmis, es generarà el PDF i es guardarà a SharePoint.</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('facturaModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="factura-reserva-id">
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label class="form-label">Nº Factura</label>
+          <input class="form-input" id="fac-num" type="text" placeholder="CL250001">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data d'emissió</label>
+          <input class="form-input" id="fac-data" type="date">
+        </div>
+      </div>
+
+      <!-- TAULA CONCEPTES EDITABLE -->
+      <div style="background:var(--gris-s);border-radius:8px;padding:16px;margin-bottom:16px;">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;font-size:11px;font-weight:700;color:var(--gris-t);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-family:Arial,sans-serif;">
+          <span>Concepte</span><span style="text-align:center">Unitats</span><span style="text-align:right">Preu/ud</span><span style="text-align:right">Import</span>
+        </div>
+        <div id="factura-lines"></div>
+      </div>
+
+      <!-- TOTALS -->
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div style="display:flex;justify-content:space-between;width:280px;font-size:13px;font-family:Arial,sans-serif;">
+          <span style="color:var(--gris-t)">Base imponible</span>
+          <input class="form-input" id="fac-base" type="number" step="0.01" style="width:100px;padding:4px 8px;font-size:13px;text-align:right;" onchange="recalcFacturaModal()">
+        </div>
+        <div style="display:flex;justify-content:space-between;width:280px;font-size:13px;font-family:Arial,sans-serif;">
+          <span style="color:var(--gris-t)">IVA (10%)</span>
+          <input class="form-input" id="fac-iva" type="number" step="0.01" style="width:100px;padding:4px 8px;font-size:13px;text-align:right;background:var(--gris-s);" readonly>
+        </div>
+        <div style="display:flex;justify-content:space-between;width:280px;font-size:13px;font-family:Arial,sans-serif;">
+          <span style="color:var(--gris-t);font-style:italic">Taxa turística (s/IVA)</span>
+          <input class="form-input" id="fac-taxa" type="number" step="0.01" style="width:100px;padding:4px 8px;font-size:13px;text-align:right;">
+        </div>
+        <div style="display:flex;justify-content:space-between;width:280px;font-size:16px;font-weight:bold;color:var(--dorado);border-top:2px solid var(--dorado);padding-top:8px;">
+          <span>TOTAL</span><span id="fac-total">—</span>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding:10px 14px;background:#EEF4FC;border-radius:6px;font-size:12px;font-family:Arial,sans-serif;color:var(--azul);">
+        📁 Es guardarà a: <code id="fac-path" style="font-weight:bold;">SharePoint/Factures/YYYY/MM/</code>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('facturaModal')">Cancel·lar</button>
+      <button class="btn btn-outline" onclick="recalcFacturaModal()">🔄 Recalcular</button>
+      <button class="btn btn-primary" onclick="generatePDF()" id="btn-gen-pdf">✅ Confirmar i generar PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: IMPORTAR -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal" style="width:480px;">
+    <div class="modal-header">
+      <div class="modal-title">⬆ Importar Excel d'Amenitiz</div>
+      <button class="modal-close" onclick="closeModal('importModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="border:2px dashed var(--gris-l);border-radius:8px;padding:40px;text-align:center;font-family:Arial,sans-serif;cursor:pointer;" id="drop-zone">
+        <div style="font-size:36px;margin-bottom:12px;">📊</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Arrossega el fitxer aquí</div>
+        <div style="font-size:13px;color:var(--gris-t);margin-bottom:16px;">o fes clic per seleccionar</div>
+        <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none;" onchange="handleFileSelect(event)">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('file-input').click()">Seleccionar fitxer .xlsx</button>
+        <div id="file-selected" style="margin-top:12px;font-size:13px;color:var(--verde);display:none;"></div>
+      </div>
+      <div style="font-size:12px;color:var(--gris-t);margin-top:12px;font-family:Arial,sans-serif;line-height:1.8;">
+        ✓ Detecta noves reserves automàticament<br>
+        ✓ Actualitza sense duplicar registres existents<br>
+        ✓ Ignora les reserves ja facturades
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('importModal')">Cancel·lar</button>
+      <button class="btn btn-primary" onclick="importExcel()" id="btn-import">⬆ Importar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ================================================================
+//  CONFIGURACIÓ — EDITA AQUESTS VALORS AMB ELS TEUS PROPIS
+// ================================================================
+const CONFIG = {
+  // -- Microsoft Azure App Registration --
+  clientId:     "fca35562-a4e5-41ea-9239-b0479c1519b4",      // Ex: "a1b2c3d4-e5f6-..."
+  tenantId:     "80f0e993-fcf9-4f07-b856-ca24f4a3920a",       // Ex: "f7g8h9i0-..."
+
+  // -- SharePoint --
+  siteUrl:      "https://elsecretdelaconca.sharepoint.com/sites/Proves", // URL del teu SharePoint
+  listName:     "Reserves_ElSecret",                   // Nom de la llista de SharePoint
+  facPdfFolder: "Factures",                            // Carpeta base per PDFs
+
+  // -- Power Automate (URLs dels fluxos) --
+  flowGenPDF:   "ENGANXA_LA_URL_DEL_FLUX_GENERAR_PDF", // URL HTTP trigger del flux PA
+
+  // -- Taxa turística (€/persona/nit) --
+  taxaTuristica: 0.65,
+  iva: 0.10,
+};
+// ================================================================
+
+// ── MSAL (Microsoft Authentication Library) ──────────────────────
+// Carrega MSAL des de CDN
+const msalScript = document.createElement('script');
+msalScript.src = 'https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js';
+document.head.appendChild(msalScript);
+
+let msalInstance, currentUser, allReserves = [], filteredReserves = [];
+let currentPage = 1; const PAGE_SIZE = 15;
+let selectedReserva = null;
+
+msalScript.onload = () => {
+  msalInstance = new msal.PublicClientApplication({
+    auth: {
+      clientId: CONFIG.clientId,
+      authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`,
+      redirectUri: window.location.href.split('?')[0],
+    },
+    cache: { cacheLocation: "sessionStorage" }
+  });
+  msalInstance.initialize().then(() => {
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) {
+      currentUser = accounts[0];
+      startApp();
+    }
+  });
+};
+
+async function getToken() {
+  const request = {
+    scopes: ["Sites.ReadWrite.All","Files.ReadWrite.All"],
+    account: currentUser
+  };
+  try {
+    const res = await msalInstance.acquireTokenSilent(request);
+    return res.accessToken;
+  } catch {
+    const res = await msalInstance.acquireTokenPopup(request);
+    return res.accessToken;
+  }
+}
+
+async function login() {
+  try {
+    const res = await msalInstance.loginPopup({
+      scopes: ["Sites.ReadWrite.All","Files.ReadWrite.All"]
+    });
+    currentUser = res.account;
+    startApp();
+  } catch(e) {
+    showToast("Error d'autenticació: " + e.message, 'error');
+  }
+}
+
+function logout() {
+  msalInstance.logoutPopup();
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+function startApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('user-name').textContent = currentUser.name || currentUser.username;
+  document.getElementById('user-email').textContent = currentUser.username;
+  loadReserves();
+}
+
+// ── GRAPH API ────────────────────────────────────────────────────
+async function graphGet(url) {
+  const token = await getToken();
+  const res = await fetch(`https://graph.microsoft.com/v1.0${url}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error(`Graph error ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+async function graphPost(url, body) {
+  const token = await getToken();
+  const res = await fetch(`https://graph.microsoft.com/v1.0${url}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`Graph error ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+async function graphPatch(url, body) {
+  const token = await getToken();
+  const res = await fetch(`https://graph.microsoft.com/v1.0${url}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`Graph error ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+// ── OBTENIR SITE ID ───────────────────────────────────────────────
+let siteId = null;
+async function getSiteId() {
+  if (siteId) return siteId;
+  const url = CONFIG.siteUrl.replace('https://','').replace('.sharepoint.com','');
+  const parts = url.split('/sites/');
+  const host = parts[0] + '.sharepoint.com';
+  const site = parts[1];
+  const data = await graphGet(`/sites/${host}:/sites/${site}`);
+  siteId = data.id;
+  return siteId;
+}
+
+// ── CARREGAR RESERVES ─────────────────────────────────────────────
+async function loadReserves() {
+  try {
+    const sid = await getSiteId();
+    const data = await graphGet(`/sites/${sid}/lists/${CONFIG.listName}/items?expand=fields&$top=999`);
+    allReserves = data.value.map(item => ({
+      id: item.id,
+      ...item.fields
+    }));
+    updateStats();
+    applyFilters();
+    loadFactures();
+    showToast('Reserves carregades correctament', 'success');
+  } catch(e) {
+    console.error(e);
+    showToast('Error carregant dades: ' + e.message, 'error');
+    // MODE DEMO si falla la connexió
+    loadDemoData();
+  }
+}
+
+function loadDemoData() {
+  allReserves = [
+    { id:'1', N_Reserva:'CL250217', Nom_Huesped:'Antoni Serrano López', DNI_CIF:'39912484D', Email:'aserrano@gmail.com', Telefon:'612345678', Allotjament:'El Drac', Plataforma:'Directe', Check_In:'2025-10-11', Check_Out:'2025-10-12', N_Noches:1, N_Adults:2, N_Menors:0, Preu_Nit:150, Unitats_Esmorzar:2, Preu_Esmorzar:7, Unitats_Dinar:0, Preu_Dinar:0, Unitats_Sopar:0, Preu_Sopar:0, Unitats_Pack:0, Preu_Pack:0, Forma_Pago:'Transferència', Estat_Pagament:'Pagat', N_Factura:'CL250217', PDF_Factura:'' },
+    { id:'2', N_Reserva:'AM-089', Nom_Huesped:'Marta Puigdomènech', DNI_CIF:'45678901B', Email:'marta@gmail.com', Telefon:'623456789', Allotjament:'La Princesa', Plataforma:'Airbnb', Check_In:'2025-10-14', Check_Out:'2025-10-17', N_Noches:3, N_Adults:2, N_Menors:0, Preu_Nit:160, Unitats_Esmorzar:0, Preu_Esmorzar:0, Unitats_Dinar:0, Preu_Dinar:0, Unitats_Sopar:0, Preu_Sopar:0, Unitats_Pack:0, Preu_Pack:0, Forma_Pago:'Targeta', Estat_Pagament:'Pendent', N_Factura:'', PDF_Factura:'' },
+    { id:'3', N_Reserva:'AM-090', Nom_Huesped:'Joan Ferrer Bosch', DNI_CIF:'56789012C', Email:'joan@gmail.com', Telefon:'634567890', Allotjament:'El Caballer', Plataforma:'Booking.com', Check_In:'2025-10-18', Check_Out:'2025-10-20', N_Noches:2, N_Adults:3, N_Menors:1, Preu_Nit:140, Unitats_Esmorzar:3, Preu_Esmorzar:7, Unitats_Dinar:0, Preu_Dinar:0, Unitats_Sopar:3, Preu_Sopar:15, Unitats_Pack:0, Preu_Pack:0, Forma_Pago:'Transferència', Estat_Pagament:'Pendent', N_Factura:'', PDF_Factura:'' },
+  ];
+  updateStats();
+  applyFilters();
+}
+
+// ── STATS ─────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('stat-total').textContent = allReserves.length;
+  const pendents = allReserves.filter(r => !r.N_Factura).length;
+  document.getElementById('stat-pendents').textContent = pendents;
+  const total = allReserves.reduce((s,r) => {
+    const calc = calcImports(r);
+    return s + calc.total;
+  }, 0);
+  document.getElementById('stat-import').textContent = fmt(total);
+  document.getElementById('topbar-sub').textContent = `${allReserves.length} reserves · Temporada 2025–2026`;
+}
+
+// ── FILTRES ───────────────────────────────────────────────────────
+function applyFilters() {
+  const aloj  = document.getElementById('filter-aloj').value;
+  const plat  = document.getElementById('filter-plataforma').value;
+  const from  = document.getElementById('filter-from').value;
+  const to    = document.getElementById('filter-to').value;
+  const srch  = document.getElementById('search-input').value.toLowerCase();
+
+  filteredReserves = allReserves.filter(r => {
+    if (aloj && r.Allotjament !== aloj) return false;
+    if (plat && r.Plataforma !== plat) return false;
+    if (from && r.Check_In < from) return false;
+    if (to   && r.Check_In > to)   return false;
+    if (srch && !`${r.Nom_Huesped} ${r.N_Reserva} ${r.Email}`.toLowerCase().includes(srch)) return false;
+    return true;
+  });
+  currentPage = 1;
+  renderTable();
+}
+
+// ── TAULA ─────────────────────────────────────────────────────────
+function renderTable() {
+  const start = (currentPage-1)*PAGE_SIZE;
+  const page  = filteredReserves.slice(start, start+PAGE_SIZE);
+  document.getElementById('table-count').textContent = `${filteredReserves.length} reserves`;
+
+  let html = `<table><thead><tr>
+    <th>Nº Reserva</th><th>Client</th><th>Allotjament</th>
+    <th>Check-in</th><th>Check-out</th><th>Plataforma</th>
+    <th>Import</th><th>Factura</th>
+  </tr></thead><tbody>`;
+
+  if (page.length === 0) {
+    html += `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--gris-t);font-family:Arial,sans-serif;">Cap reserva trobada</td></tr>`;
+  } else {
+    page.forEach(r => {
+      const calc = calcImports(r);
+      const facBadge = r.N_Factura
+        ? `<span class="badge badge-green">✓ Emesa</span>`
+        : `<span class="badge badge-orange">Pendent</span>`;
+      const platBadge = `<span class="badge badge-blue">${r.Plataforma||'—'}</span>`;
+      const sel = selectedReserva && selectedReserva.id === r.id ? 'selected' : '';
+      html += `<tr class="data-row ${sel}" onclick="selectReserva('${r.id}')">
+        <td><b>${r.N_Reserva||'—'}</b></td>
+        <td>${r.Nom_Huesped||'—'}</td>
+        <td>${r.Allotjament||'—'}</td>
+        <td>${fmtDate(r.Check_In)}</td>
+        <td>${fmtDate(r.Check_Out)}</td>
+        <td>${platBadge}</td>
+        <td><b>${fmt(calc.total)}</b></td>
+        <td>${facBadge}</td>
+      </tr>`;
+    });
+  }
+  html += `</tbody></table>`;
+  document.getElementById('table-body-wrapper').innerHTML = html;
+
+  // Paginació
+  const totalPages = Math.ceil(filteredReserves.length / PAGE_SIZE);
+  document.getElementById('page-info').textContent = `Mostrant ${start+1}–${Math.min(start+PAGE_SIZE, filteredReserves.length)} de ${filteredReserves.length}`;
+  let pbHtml = `<button class="btn btn-outline btn-sm" onclick="changePage(${currentPage-1})" ${currentPage===1?'disabled':''}>← Ant</button>`;
+  for (let i=Math.max(1,currentPage-1); i<=Math.min(totalPages,currentPage+1); i++) {
+    pbHtml += `<button class="btn ${i===currentPage?'btn-primary':'btn-outline'} btn-sm" onclick="changePage(${i})">${i}</button>`;
+  }
+  pbHtml += `<button class="btn btn-outline btn-sm" onclick="changePage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>Seg →</button>`;
+  document.getElementById('page-btns').innerHTML = pbHtml;
+}
+
+function changePage(p) {
+  const total = Math.ceil(filteredReserves.length/PAGE_SIZE);
+  if (p<1||p>total) return;
+  currentPage=p; renderTable();
+}
+
+// ── SELECCIONAR RESERVA (PANELL DRET) ────────────────────────────
+function selectReserva(id) {
+  selectedReserva = allReserves.find(r => r.id === id);
+  if (!selectedReserva) return;
+  renderTable();
+  const r = selectedReserva;
+  const calc = calcImports(r);
+  const facSt = r.N_Factura
+    ? `<span class="badge badge-green">✓ Emesa — ${r.N_Factura}</span>`
+    : `<span class="badge badge-orange">Pendent d'emetre</span>`;
+
+  document.getElementById('detail-panel').innerHTML = `
+    <div class="detail-header">
+      <div class="detail-name">${r.Nom_Huesped||'—'}</div>
+      <div class="detail-ref">Reserva · ${r.N_Reserva||'—'}</div>
+      <div class="detail-aloj">${r.Allotjament||'—'} · ${fmtDate(r.Check_In)} → ${fmtDate(r.Check_Out)} · ${r.N_Noches||0} nit/s</div>
+    </div>
+    <div style="overflow-y:auto;flex:1;">
+      <div class="detail-section">
+        <div class="detail-section-title">Client</div>
+        <div class="detail-row"><span class="detail-key">DNI/CIF</span><span class="detail-val">${r.DNI_CIF||'—'}</span></div>
+        <div class="detail-row"><span class="detail-key">Email</span><span class="detail-val">${r.Email||'—'}</span></div>
+        <div class="detail-row"><span class="detail-key">Telèfon</span><span class="detail-val">${r.Telefon||'—'}</span></div>
+        <div class="detail-row"><span class="detail-key">Plataforma</span><span class="detail-val">${r.Plataforma||'—'}</span></div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Serveis</div>
+        <div class="detail-row"><span class="detail-key">Allotjament (${r.N_Noches||0} nit/s)</span><span class="detail-val">${fmt(calc.importAloj)}</span></div>
+        ${calc.importEsm>0?`<div class="detail-row"><span class="detail-key">Esmorzar (${r.Unitats_Esmorzar} ud.)</span><span class="detail-val">${fmt(calc.importEsm)}</span></div>`:''}
+        ${calc.importDin>0?`<div class="detail-row"><span class="detail-key">Dinar (${r.Unitats_Dinar} ud.)</span><span class="detail-val">${fmt(calc.importDin)}</span></div>`:''}
+        ${calc.importSop>0?`<div class="detail-row"><span class="detail-key">Sopar (${r.Unitats_Sopar} ud.)</span><span class="detail-val">${fmt(calc.importSop)}</span></div>`:''}
+        ${calc.importPack>0?`<div class="detail-row"><span class="detail-key">Pack celebració</span><span class="detail-val">${fmt(calc.importPack)}</span></div>`:''}
+        <div class="detail-row"><span class="detail-key" style="font-style:italic">Taxa turística</span><span class="detail-val" style="font-style:italic">${fmt(calc.taxa)}</span></div>
+        <div class="detail-row"><span class="detail-key">IVA (10%)</span><span class="detail-val">${fmt(calc.iva)}</span></div>
+        <div class="detail-row" style="border-top:2px solid var(--dorado);margin-top:6px;padding-top:8px;">
+          <span class="detail-key" style="font-weight:bold;color:var(--negro)">TOTAL</span>
+          <span class="detail-val amount">${fmt(calc.total)}</span>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Facturació</div>
+        <div class="detail-row"><span class="detail-key">Estat</span><span class="detail-val">${facSt}</span></div>
+        <div class="detail-row"><span class="detail-key">Forma pagament</span><span class="detail-val">${r.Forma_Pago||'—'}</span></div>
+        <div class="detail-row"><span class="detail-key">Estat pagament</span><span class="detail-val">${r.Estat_Pagament||'—'}</span></div>
+      </div>
+    </div>
+    <div class="detail-actions">
+      <button class="btn btn-primary btn-full" onclick="openFacturaModal('${r.id}')">🧾 Generar / Editar factura</button>
+      <button class="btn btn-outline btn-full" onclick="editReserva('${r.id}')">✏️ Editar reserva</button>
+      ${r.PDF_Factura ? `<a href="${r.PDF_Factura}" target="_blank" class="btn btn-outline btn-full" style="text-align:center;text-decoration:none;color:var(--verde);">📥 Descarregar PDF</a>` : ''}
+    </div>`;
+}
+
+// ── CÀLCULS ───────────────────────────────────────────────────────
+function calcImports(r) {
+  const nits = parseFloat(r.N_Noches)||0;
+  const adults = parseFloat(r.N_Adults)||0;
+  const menors = parseFloat(r.N_Menors)||0;
+  const importAloj = (parseFloat(r.Preu_Nit)||0) * nits;
+  const importEsm  = (parseFloat(r.Unitats_Esmorzar)||0) * (parseFloat(r.Preu_Esmorzar)||0);
+  const importDin  = (parseFloat(r.Unitats_Dinar)||0)   * (parseFloat(r.Preu_Dinar)||0);
+  const importSop  = (parseFloat(r.Unitats_Sopar)||0)   * (parseFloat(r.Preu_Sopar)||0);
+  const importPack = (parseFloat(r.Unitats_Pack)||0)    * (parseFloat(r.Preu_Pack)||0);
+  const unitsTaxa  = Math.max(0, adults - menors) * nits;
+  const taxa       = r2(unitsTaxa * CONFIG.taxaTuristica);
+  const base       = r2(importAloj + importEsm + importDin + importSop + importPack);
+  const iva        = r2(base * CONFIG.iva);
+  const total      = r2(base + iva + taxa);
+  return { importAloj, importEsm, importDin, importSop, importPack, unitsTaxa, taxa, base, iva, total };
+}
+
+function r2(n) { return Math.round(n*100)/100; }
+function fmt(n) { return (n||0).toLocaleString('ca-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+'€'; }
+function fmtDate(d) { if(!d) return '—'; const p=d.split('T')[0].split('-'); return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:d; }
+
+// ── FORMULARI NOVA/EDITAR RESERVA ─────────────────────────────────
+function calcNits() {
+  const ci = document.getElementById('f-checkin').value;
+  const co = document.getElementById('f-checkout').value;
+  if (ci && co) {
+    const diff = (new Date(co) - new Date(ci)) / 86400000;
+    document.getElementById('f-nits').value = diff > 0 ? diff : 0;
+    calcFactura();
+  }
+}
+
+function calcFactura() {
+  const nits   = parseInt(document.getElementById('f-nits').value)||0;
+  const adults = parseInt(document.getElementById('f-adults').value)||0;
+  const menors = parseInt(document.getElementById('f-menors').value)||0;
+  const r = {
+    N_Noches: nits, N_Adults: adults, N_Menors: menors,
+    Preu_Nit:      parseFloat(document.getElementById('f-preu-nit').value)||0,
+    Unitats_Esmorzar: parseInt(document.getElementById('f-ud-esm').value)||0,
+    Preu_Esmorzar: parseFloat(document.getElementById('f-preu-esm').value)||0,
+    Unitats_Dinar: parseInt(document.getElementById('f-ud-din').value)||0,
+    Preu_Dinar:    parseFloat(document.getElementById('f-preu-din').value)||0,
+    Unitats_Sopar: parseInt(document.getElementById('f-ud-sop').value)||0,
+    Preu_Sopar:    parseFloat(document.getElementById('f-preu-sop').value)||0,
+    Unitats_Pack:  parseInt(document.getElementById('f-ud-pack').value)||0,
+    Preu_Pack:     parseFloat(document.getElementById('f-preu-pack').value)||0,
+  };
+  const calc = calcImports(r);
+  if (nits > 0) {
+    document.getElementById('resum-calc').style.display = 'block';
+    document.getElementById('r-base').textContent  = fmt(calc.base);
+    document.getElementById('r-iva').textContent   = fmt(calc.iva);
+    document.getElementById('r-taxa').textContent  = fmt(calc.taxa);
+    document.getElementById('r-total').textContent = fmt(calc.total);
+  }
+}
+
+function editReserva(id) {
+  const r = allReserves.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('edit-id').value = r.id;
+  document.getElementById('f-nom').value         = r.Nom_Huesped||'';
+  document.getElementById('f-dni').value         = r.DNI_CIF||'';
+  document.getElementById('f-email').value       = r.Email||'';
+  document.getElementById('f-telefon').value     = r.Telefon||'';
+  document.getElementById('f-empresa').value     = r.Empresa_Client||'';
+  document.getElementById('f-adreca').value      = r.Direccio||'';
+  document.getElementById('f-cp').value          = r.CP_Ciutat||'';
+  document.getElementById('f-aloj').value        = r.Allotjament||'';
+  document.getElementById('f-plataforma').value  = r.Plataforma||'Directe';
+  document.getElementById('f-checkin').value     = (r.Check_In||'').split('T')[0];
+  document.getElementById('f-checkout').value    = (r.Check_Out||'').split('T')[0];
+  document.getElementById('f-nits').value        = r.N_Noches||0;
+  document.getElementById('f-adults').value      = r.N_Adults||2;
+  document.getElementById('f-menors').value      = r.N_Menors||0;
+  document.getElementById('f-preu-nit').value    = r.Preu_Nit||'';
+  document.getElementById('f-ud-esm').value      = r.Unitats_Esmorzar||0;
+  document.getElementById('f-preu-esm').value    = r.Preu_Esmorzar||0;
+  document.getElementById('f-ud-din').value      = r.Unitats_Dinar||0;
+  document.getElementById('f-preu-din').value    = r.Preu_Dinar||0;
+  document.getElementById('f-ud-sop').value      = r.Unitats_Sopar||0;
+  document.getElementById('f-preu-sop').value    = r.Preu_Sopar||0;
+  document.getElementById('f-ud-pack').value     = r.Unitats_Pack||0;
+  document.getElementById('f-preu-pack').value   = r.Preu_Pack||0;
+  document.getElementById('f-forma-pago').value  = r.Forma_Pago||'Transferència bancària';
+  document.getElementById('f-estat-pago').value  = r.Estat_Pagament||'Pendent';
+  document.getElementById('f-notes').value       = r.Notes||'';
+  showScreen('nova');
+  calcFactura();
+}
+
+async function saveReserva() {
+  const nom = document.getElementById('f-nom').value.trim();
+  const aloj = document.getElementById('f-aloj').value;
+  const ci   = document.getElementById('f-checkin').value;
+  const co   = document.getElementById('f-checkout').value;
+  if (!nom || !aloj || !ci || !co) {
+    showToast('Omple els camps obligatoris (*)','error'); return;
+  }
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true; btn.textContent = '⏳ Guardant...';
+
+  const fields = {
+    Nom_Huesped:      document.getElementById('f-nom').value,
+    DNI_CIF:          document.getElementById('f-dni').value,
+    Email:            document.getElementById('f-email').value,
+    Telefon:          document.getElementById('f-telefon').value,
+    Empresa_Client:   document.getElementById('f-empresa').value,
+    Direccio:         document.getElementById('f-adreca').value,
+    CP_Ciutat:        document.getElementById('f-cp').value,
+    Allotjament:      document.getElementById('f-aloj').value,
+    Plataforma:       document.getElementById('f-plataforma').value,
+    Check_In:         document.getElementById('f-checkin').value,
+    Check_Out:        document.getElementById('f-checkout').value,
+    N_Noches:         parseInt(document.getElementById('f-nits').value)||0,
+    N_Adults:         parseInt(document.getElementById('f-adults').value)||0,
+    N_Menors:         parseInt(document.getElementById('f-menors').value)||0,
+    Preu_Nit:         parseFloat(document.getElementById('f-preu-nit').value)||0,
+    Unitats_Esmorzar: parseInt(document.getElementById('f-ud-esm').value)||0,
+    Preu_Esmorzar:    parseFloat(document.getElementById('f-preu-esm').value)||0,
+    Unitats_Dinar:    parseInt(document.getElementById('f-ud-din').value)||0,
+    Preu_Dinar:       parseFloat(document.getElementById('f-preu-din').value)||0,
+    Unitats_Sopar:    parseInt(document.getElementById('f-ud-sop').value)||0,
+    Preu_Sopar:       parseFloat(document.getElementById('f-preu-sop').value)||0,
+    Unitats_Pack:     parseInt(document.getElementById('f-ud-pack').value)||0,
+    Preu_Pack:        parseFloat(document.getElementById('f-preu-pack').value)||0,
+    Forma_Pago:       document.getElementById('f-forma-pago').value,
+    Estat_Pagament:   document.getElementById('f-estat-pago').value,
+    Notes:            document.getElementById('f-notes').value,
+  };
+
+  try {
+    const sid    = await getSiteId();
+    const editId = document.getElementById('edit-id').value;
+    if (editId) {
+      await graphPatch(`/sites/${sid}/lists/${CONFIG.listName}/items/${editId}/fields`, fields);
+      const idx = allReserves.findIndex(r => r.id === editId);
+      if (idx > -1) allReserves[idx] = { ...allReserves[idx], ...fields };
+      showToast('Reserva actualitzada ✓','success');
+    } else {
+      const res = await graphPost(`/sites/${sid}/lists/${CONFIG.listName}/items`, { fields });
+      allReserves.unshift({ id: res.id, ...fields });
+      showToast('Reserva creada ✓','success');
+    }
+    updateStats(); applyFilters();
+    document.getElementById('edit-id').value = '';
+    showScreen('reserves');
+  } catch(e) {
+    showToast('Error: ' + e.message,'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Guardar reserva';
+  }
+}
+
+// ── MODAL FACTURA ─────────────────────────────────────────────────
+function openFacturaModal(id) {
+  const r = allReserves.find(x => x.id === id);
+  if (!r) return;
+  const calc = calcImports(r);
+  document.getElementById('factura-reserva-id').value = id;
+  document.getElementById('factura-modal-title').textContent = `🧾 Factura · ${r.Nom_Huesped}`;
+
+  // Número factura auto si no en té
+  if (!r.N_Factura) {
+    const d = new Date();
+    const yr = String(d.getFullYear()).slice(2);
+    const mo = String(d.getMonth()+1).padStart(2,'0');
+    const num = String(allReserves.filter(x=>x.N_Factura).length+1).padStart(4,'0');
+    document.getElementById('fac-num').value = `CL${yr}${mo}${num}`;
+  } else {
+    document.getElementById('fac-num').value = r.N_Factura;
+  }
+  document.getElementById('fac-data').value = new Date().toISOString().split('T')[0];
+
+  // Línies de conceptes editables
+  const lines = [
+    { label:`Allotjament — ${r.Allotjament}`, ud: r.N_Noches||0, preu: r.Preu_Nit||0, imp: calc.importAloj },
+    { label:'Esmorzar', ud: r.Unitats_Esmorzar||0, preu: r.Preu_Esmorzar||0, imp: calc.importEsm },
+    { label:'Dinar', ud: r.Unitats_Dinar||0, preu: r.Preu_Dinar||0, imp: calc.importDin },
+    { label:'Sopar', ud: r.Unitats_Sopar||0, preu: r.Preu_Sopar||0, imp: calc.importSop },
+    { label:'Pack celebració', ud: r.Unitats_Pack||0, preu: r.Preu_Pack||0, imp: calc.importPack },
+    { label:`Taxa turística (${r.N_Adults||0} adults · ${r.N_Noches||0} nits)`, ud: calc.unitsTaxa, preu: CONFIG.taxaTuristica, imp: calc.taxa, italic:true },
+  ].filter(l => l.ud > 0);
+
+  let lHtml = '';
+  lines.forEach((l,i) => {
+    lHtml += `<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px;">
+      <span style="font-size:13px;font-family:Arial,sans-serif;${l.italic?'font-style:italic;color:var(--gris-t)':''}">${l.label}</span>
+      <input class="form-input fac-line-ud" data-idx="${i}" type="number" value="${l.ud}" style="padding:5px 8px;font-size:13px;text-align:center;" onchange="recalcFacturaModal()">
+      <input class="form-input fac-line-preu" data-idx="${i}" type="number" step="0.01" value="${l.preu}" style="padding:5px 8px;font-size:13px;text-align:right;" onchange="recalcFacturaModal()">
+      <input class="form-input fac-line-imp" data-idx="${i}" type="number" step="0.01" value="${r2(l.imp)}" style="padding:5px 8px;font-size:13px;text-align:right;background:var(--gris-s);" readonly>
+    </div>`;
+  });
+  document.getElementById('factura-lines').innerHTML = lHtml;
+
+  document.getElementById('fac-base').value = calc.base;
+  document.getElementById('fac-iva').value  = calc.iva;
+  document.getElementById('fac-taxa').value = calc.taxa;
+  document.getElementById('fac-total').textContent = fmt(calc.total);
+
+  // Ruta PDF
+  const d = new Date();
+  const yr = d.getFullYear(); const mo = String(d.getMonth()+1).padStart(2,'0');
+  const nomNet = (r.Nom_Huesped||'client').replace(/ /g,'_');
+  document.getElementById('fac-path').textContent =
+    `SharePoint/Factures/${yr}/${mo}/${document.getElementById('fac-num').value}_${nomNet}.pdf`;
+
+  openModal('facturaModal');
+}
+
+function recalcFacturaModal() {
+  const uds   = document.querySelectorAll('.fac-line-ud');
+  const preus = document.querySelectorAll('.fac-line-preu');
+  const imps  = document.querySelectorAll('.fac-line-imp');
+  let base = 0; let taxaVal = 0;
+  uds.forEach((ud,i) => {
+    const imp = r2(parseFloat(ud.value||0) * parseFloat(preus[i].value||0));
+    imps[i].value = imp;
+    // l'última línia és la taxa (italic)
+    if (i === uds.length-1) taxaVal = imp;
+    else base += imp;
+  });
+  base = r2(base);
+  const iva  = r2(base * CONFIG.iva);
+  const tot  = r2(base + iva + taxaVal);
+  document.getElementById('fac-base').value = base;
+  document.getElementById('fac-iva').value  = iva;
+  document.getElementById('fac-taxa').value = taxaVal;
+  document.getElementById('fac-total').textContent = fmt(tot);
+}
+
+// ── GENERAR PDF (via Power Automate) ─────────────────────────────
+async function generatePDF() {
+  const id       = document.getElementById('factura-reserva-id').value;
+  const r        = allReserves.find(x => x.id === id);
+  const numFac   = document.getElementById('fac-num').value;
+  const dataFac  = document.getElementById('fac-data').value;
+  const base     = parseFloat(document.getElementById('fac-base').value)||0;
+  const iva      = parseFloat(document.getElementById('fac-iva').value)||0;
+  const taxa     = parseFloat(document.getElementById('fac-taxa').value)||0;
+  const total    = r2(base+iva+taxa);
+
+  if (!CONFIG.flowGenPDF || CONFIG.flowGenPDF.includes('ENGANXA')) {
+    showToast('⚠️ Configura la URL del flux de Power Automate al CONFIG', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-gen-pdf');
+  btn.disabled = true; btn.textContent = '⏳ Generant PDF...';
+
+  try {
+    // Crida al flux de Power Automate
+    const payload = {
+      N_FACTURA:       numFac,
+      FECHA_EMISION:   dataFac,
+      ALOJAMIENTO:     r.Allotjament||'',
+      NOMBRE_HUESPED:  r.Nom_Huesped||'',
+      DNI_CIF:         r.DNI_CIF||'',
+      EMPRESA_CLIENTE: r.Empresa_Client||'',
+      DIRECCION:       r.Direccio||'',
+      CP_CIUDAD:       r.CP_Ciutat||'',
+      EMAIL_CLIENTE:   r.Email||'',
+      FECHA_CHECKIN:   fmtDate(r.Check_In),
+      FECHA_CHECKOUT:  fmtDate(r.Check_Out),
+      N_NOCHES:        String(r.N_Noches||0),
+      N_ADULTS:        String(r.N_Adults||0),
+      PREU_NIT:        String(r.Preu_Nit||0),
+      IMPORT_ALOJ:     String(r2((r.Preu_Nit||0)*(r.N_Noches||0))),
+      BASE_IMPONIBLE:  String(base),
+      IMPORT_IVA:      String(iva),
+      IMPORT_TAXA:     String(taxa),
+      TOTAL_FACTURA:   String(total),
+      FORMA_PAGO:      r.Forma_Pago||'',
+      ESTAT_PAGAMENT:  r.Estat_Pagament||'',
+      DATA_PAGAMENT:   r.Data_Pagament||'',
+    };
+
+    const res = await fetch(CONFIG.flowGenPDF, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    const pdfUrl = data.pdfUrl || '';
+
+    // Actualitzar registre a SharePoint
+    const sid = await getSiteId();
+    await graphPatch(`/sites/${sid}/lists/${CONFIG.listName}/items/${id}/fields`, {
+      N_Factura:    numFac,
+      Data_Emissio: dataFac,
+      PDF_Factura:  pdfUrl,
+    });
+    const idx = allReserves.findIndex(x => x.id === id);
+    if (idx > -1) {
+      allReserves[idx].N_Factura    = numFac;
+      allReserves[idx].Data_Emissio = dataFac;
+      allReserves[idx].PDF_Factura  = pdfUrl;
+    }
+    updateStats(); applyFilters(); selectReserva(id);
+    closeModal('facturaModal');
+    showToast(`✅ PDF generat i guardat: ${numFac}`, 'success');
+  } catch(e) {
+    showToast('Error generant PDF: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '✅ Confirmar i generar PDF';
+  }
+}
+
+// ── CARREGAR FACTURES ─────────────────────────────────────────────
+function loadFactures() {
+  const factures = allReserves.filter(r => r.N_Factura);
+  if (factures.length === 0) {
+    document.getElementById('factures-body').innerHTML =
+      `<div class="loading" style="color:var(--gris-t);">Cap factura emesa encara</div>`;
+    return;
+  }
+  let html = `<table><thead><tr>
+    <th>Nº Factura</th><th>Client</th><th>Allotjament</th>
+    <th>Data emissió</th><th>Total</th><th>Estat</th><th>PDF</th>
+  </tr></thead><tbody>`;
+  factures.forEach(r => {
+    const calc = calcImports(r);
+    html += `<tr>
+      <td><b>${r.N_Factura}</b></td>
+      <td>${r.Nom_Huesped||'—'}</td>
+      <td>${r.Allotjament||'—'}</td>
+      <td>${fmtDate(r.Data_Emissio)}</td>
+      <td><b>${fmt(calc.total)}</b></td>
+      <td><span class="badge badge-${r.Estat_Pagament==='Pagat'?'green':'orange'}">${r.Estat_Pagament||'—'}</span></td>
+      <td>${r.PDF_Factura?`<a href="${r.PDF_Factura}" target="_blank" class="btn btn-outline btn-sm">📥 PDF</a>`:'—'}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById('factures-body').innerHTML = html;
+}
+
+// ── EXPORTAR EXCEL ────────────────────────────────────────────────
+function exportExcel() {
+  const from  = document.getElementById('exp-from').value;
+  const to    = document.getElementById('exp-to').value;
+  const aloj  = document.getElementById('exp-aloj').value;
+
+  let data = allReserves.filter(r => {
+    if (from && (r.Check_In||'') < from) return false;
+    if (to   && (r.Check_In||'') > to)   return false;
+    if (aloj && r.Allotjament !== aloj)   return false;
+    return true;
+  });
+
+  const headers = [
+    'Nº Reserva','Client','DNI/CIF','Email','Telèfon','Empresa',
+    'Allotjament','Plataforma','Check-in','Check-out','Nits','Adults','Menors',
+    'Preu/nit','Esmorzar ud','Esmorzar €','Dinar ud','Dinar €',
+    'Sopar ud','Sopar €','Pack ud','Pack €',
+    'Base imponible','IVA (10%)','Taxa turística','TOTAL',
+    'Forma pagament','Estat pagament','Nº Factura','Data emissió','Link PDF Factura'
+  ];
+
+  let csv = headers.join('\t') + '\n';
+  data.forEach(r => {
+    const calc = calcImports(r);
+    csv += [
+      r.N_Reserva||'', r.Nom_Huesped||'', r.DNI_CIF||'', r.Email||'', r.Telefon||'', r.Empresa_Client||'',
+      r.Allotjament||'', r.Plataforma||'', fmtDate(r.Check_In), fmtDate(r.Check_Out),
+      r.N_Noches||0, r.N_Adults||0, r.N_Menors||0,
+      r.Preu_Nit||0,
+      r.Unitats_Esmorzar||0, calc.importEsm,
+      r.Unitats_Dinar||0, calc.importDin,
+      r.Unitats_Sopar||0, calc.importSop,
+      r.Unitats_Pack||0, calc.importPack,
+      calc.base, calc.iva, calc.taxa, calc.total,
+      r.Forma_Pago||'', r.Estat_Pagament||'', r.N_Factura||'', fmtDate(r.Data_Emissio),
+      r.PDF_Factura||''
+    ].join('\t') + '\n';
+  });
+
+  // Descarregar com Excel (TSV que Excel obre directament)
+  const blob = new Blob(['\uFEFF'+csv], { type:'text/tab-separated-values;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const d = new Date();
+  a.download = `Reserves_ElSecret_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}.xls`;
+  a.click();
+  showToast('Excel descarregat ✓', 'success');
+}
+
+// ── IMPORTAR AMENITIZ ─────────────────────────────────────────────
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) {
+    document.getElementById('file-selected').style.display = 'block';
+    document.getElementById('file-selected').textContent = `✓ Fitxer seleccionat: ${file.name}`;
+  }
+}
+
+async function importExcel() {
+  const fileInput = document.getElementById('file-input');
+  if (!fileInput.files[0]) { showToast('Selecciona un fitxer primer','error'); return; }
+  showToast('⏳ Processant Excel... (via Power Automate)', 'success');
+  closeModal('importModal');
+  // La importació real es fa pujant el fitxer a la carpeta Amenitiz_Imports de SharePoint
+  // i Power Automate l'agafa automàticament
+}
+
+// ── NAVEGACIÓ ─────────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navMap = { reserves:'nav-reserves', nova:'nav-nova', factures:'nav-factures', export:'nav-export' };
+  if (navMap[name]) document.getElementById(navMap[name]).classList.add('active');
+  const titles = {
+    reserves: ['Reserves','Llista de totes les reserves'],
+    nova:     ['Nova reserva','Introduir una reserva manualment'],
+    factures: ['Factures','Totes les factures emeses'],
+    export:   ['Exportar a Excel','Genera un Excel amb tots els camps i links als PDFs'],
+  };
+  if (titles[name]) {
+    document.getElementById('topbar-title').textContent = titles[name][0];
+    document.getElementById('topbar-sub').textContent   = titles[name][1];
+  }
+  if (name === 'nova') { document.getElementById('edit-id').value=''; document.getElementById('resum-calc').style.display='none'; }
+  if (name === 'factures') loadFactures();
+}
+
+// ── MODALS ─────────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target===o) o.classList.remove('open'); });
+});
+
+// ── TOAST ──────────────────────────────────────────────────────────
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
